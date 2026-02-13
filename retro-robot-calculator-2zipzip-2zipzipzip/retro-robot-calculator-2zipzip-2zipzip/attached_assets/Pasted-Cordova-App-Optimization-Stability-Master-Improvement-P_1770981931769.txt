@@ -1,0 +1,119 @@
+Cordova App Optimization & Stability – Master Improvement Prompt
+
+Apply the following improvements to the application and ensure all changes work properly in both:
+
+Main Web App
+
+Cordova Android Build (WebView)
+
+1. Sound Issues Fix
+
+Restore and ensure all previously used sounds are working correctly.
+
+Fix missing or non-playing audio in all sections.
+
+Preload audio files to prevent delay or failure.
+
+Ensure sound works across all Android devices.
+
+Handle WebView audio permissions and autoplay restrictions properly.
+
+2. Input Field Restoration
+
+Restore any missing input fields that were previously available.
+
+Ensure all inputs are fully functional and visible.
+
+Validate focus, typing behavior, and data handling.
+
+3. Performance Optimization (Lag Fix)
+
+Optimize the app for smooth performance.
+
+Reduce UI lag and slow transitions.
+
+Minimize heavy DOM updates and unnecessary re-renders.
+
+Compress images, audio, and assets.
+
+Use hardware acceleration where possible.
+
+Ensure smooth performance on low and mid-range Android devices.
+
+App should feel fast and responsive like a native application.
+
+4. Native App Experience (Cordova)
+
+Optimize Cordova WebView settings for better performance.
+
+Remove unnecessary delays during loading.
+
+Ensure smooth scrolling and touch response.
+
+Disable unwanted zoom or bounce effects.
+
+Improve startup time.
+
+5. Screen Orientation Lock
+
+The application must work in Portrait mode only.
+
+Disable horizontal (landscape) orientation for:
+
+Mobile phones
+
+Tablets
+
+Orientation lock must work inside Cordova Android build.
+
+6. Responsive Design Fix (All Devices)
+
+Ensure the UI works properly across different screen sizes and resolutions.
+
+Fix layout breaking issues on small and large devices.
+
+No element should overflow outside the screen.
+
+7. Chat Bubble Layout Fix (Important)
+
+Fix bubble chat design where text goes outside the bubble shape.
+
+Implement:
+
+Proper padding
+
+Word wrapping
+
+Auto height adjustment
+
+Max-width (percentage based)
+
+Ensure chat bubbles display correctly on all screen sizes and devices.
+
+8. Device Compatibility
+
+Test and optimize for:
+
+Small phones
+
+Large phones
+
+Tablets
+
+Maintain consistent UI scaling and readability.
+
+9. Final Goal
+
+The application should:
+
+Run smoothly without lag
+
+Play all sounds correctly
+
+Work only in portrait mode
+
+Look properly aligned on all devices
+
+Provide a fast, stable, and native-like experience inside Cordova
+
+Ensure all fixes are implemented in both the web version and the Cordova wrapped Android application.

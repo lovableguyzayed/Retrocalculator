@@ -101,12 +101,15 @@ export default function ChatCalculator() {
     // Sound is handled in LogicCalculation usually, but ensures sync if called elsewhere
   };
 
-  const [audioInstances, setAudioInstances] = useState<Map<string, HTMLAudioElement>>(new Map());
+  const audioContextRef = React.useRef<AudioContext | null>(null);
 
   const playRetroSound = (type: 'beep' | 'confirm' | 'calculate' | 'success' | 'select' | 'error' | 'swoosh' | 'digital' | 'laser' | 'coin' | 'power' | 'reset') => {
     try {
-      // Use standard Oscillator for reliable web audio feedback across all devices
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const audioContext = audioContextRef.current;
+      
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }

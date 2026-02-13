@@ -130,6 +130,32 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
     }, 4200);
   };
 
+  const calculatePrice = () => {
+    const amount = parseFloat(calcPrice);
+    if (!amount || amount <= 0 || isNaN(amount)) {
+      showCustomNotification('Please enter a valid price');
+      return;
+    }
+    const result = amount / unitRate;
+    setPriceResult(result.toFixed(2));
+    playRetroSound('calculate');
+    triggerHaptic('light');
+    triggerRobotAnimation('processing');
+  };
+
+  const calculateQuantity = () => {
+    const amount = parseFloat(calcQuantity);
+    if (!amount || amount <= 0 || isNaN(amount)) {
+      showCustomNotification('Please enter a valid quantity');
+      return;
+    }
+    const result = amount * unitRate;
+    setQuantityResult(result.toFixed(2));
+    playRetroSound('calculate');
+    triggerHaptic('light');
+    triggerRobotAnimation('processing');
+  };
+
   return (
     <div className="w-1/2 bg-bg-card p-4 pt-4 relative overflow-y-auto z-20 flex flex-col" style={{ maxHeight: 'calc(100vh - 11rem)', zIndex: 10 }}>
       
@@ -445,7 +471,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
 
           {/* Price Calculator Screen */}
           {calculatorTab === 'price-to-quantity' && (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-12">
               <button
                 onClick={() => setCalculatorTab(null)}
                 className="flex items-center text-accent hover:text-primary transition-colors text-sm font-medium mb-3"
@@ -459,12 +485,13 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                   PRICE CALCULATOR
                 </div>
                 <div>
-                  <label className="text-primary font-bold text-xs block mb-2 tracking-wide">PRICE (₹):</label>
+                  <label className="text-primary font-bold text-xs block mb-2 tracking-wide uppercase">Enter Price (₹):</label>
                   <div 
                     onClick={() => onInputFocus('calcPrice', calcPrice, setCalcPrice)}
-                    className={`input-retro w-full p-3 rounded-lg text-white text-sm font-medium bg-gradient-to-r from-bg-card to-bg-dark border-2 transition-all cursor-pointer ${activeInputId === 'calcPrice' ? 'border-accent shadow-[0_0_15px_rgba(239,239,187,0.5)] scale-[1.02] opacity-100 pointer-events-auto' : 'border-primary'}`}
+                    className={`input-retro w-full p-3 rounded-lg text-white text-base font-bold bg-gradient-to-r from-bg-card to-bg-dark border-2 transition-all cursor-pointer flex items-center justify-between ${activeInputId === 'calcPrice' ? 'border-accent shadow-[0_0_15px_rgba(239,239,187,0.5)] scale-[1.02] opacity-100 pointer-events-auto' : 'border-primary'}`}
                   >
-                    {calcPrice || <span className="text-gray-500">Enter price</span>}
+                    <span>{calcPrice || <span className="text-gray-500 font-normal">0.00</span>}</span>
+                    <i className="fas fa-keyboard text-xs opacity-50"></i>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -501,6 +528,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                               displayQuantity = quantity / 1000;
                               displayUnit = 'ton';
                             } else if (quantity >= 100) {
+                              displayQuantity = quantity / 10; // Quintal is 100kg
                               displayQuantity = quantity / 100;
                               displayUnit = 'quintal';
                             } else if (quantity < 1) {
@@ -537,7 +565,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                         } else if (selectedCategory === 'volume') {
                           // Volume conversions - both directions
                           if (baseUnit === 'ml') {
-                            if (quantity >= 3785410) {
+                            if (quantity >= 3785.41) {
                               displayQuantity = quantity / 3785.41;
                               displayUnit = 'gallon';
                             } else if (quantity >= 1000) {
@@ -545,8 +573,8 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                               displayUnit = 'l';
                             }
                           } else if (baseUnit === 'l') {
-                            if (quantity >= 3785.41) {
-                              displayQuantity = quantity / 3785.41;
+                            if (quantity >= 3.785) {
+                              displayQuantity = quantity / 3.785;
                               displayUnit = 'gallon';
                             } else if (quantity < 1) {
                               displayQuantity = quantity * 1000;
@@ -605,7 +633,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                 </div>
                 {quantityResult && (
                   <div 
-                    className="mt-3 text-center p-2 rounded bg-accent/10 border border-accent/30 cursor-pointer hover:bg-accent/20 transition-colors group"
+                    className="mt-3 text-center p-3 rounded bg-accent/10 border-2 border-accent animate-pulse-slow cursor-pointer hover:bg-accent/20 transition-colors group"
                     onClick={() => {
                       if (quantityResult) {
                         playRetroSound('beep');
@@ -613,10 +641,10 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                       }
                     }}
                   >
-                    <div className="text-accent text-xs font-bold mb-1 flex items-center justify-center gap-2">
+                    <div className="text-accent text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center gap-2">
                       RESULT <i className="fas fa-expand-alt text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
                     </div>
-                    <div className="text-white text-sm font-medium">{quantityResult}</div>
+                    <div className="text-white text-lg font-black break-words leading-tight">{quantityResult}</div>
                   </div>
                 )}
               </div>
@@ -625,7 +653,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
 
           {/* Quantity Calculator Screen */}
           {calculatorTab === 'quantity-to-price' && (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-12">
               <button
                 onClick={() => setCalculatorTab(null)}
                 className="flex items-center text-accent hover:text-primary transition-colors text-sm font-medium mb-3"
@@ -638,15 +666,213 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                   <i className="fas fa-balance-scale mr-2 text-base"></i>
                   QUANTITY CALCULATOR
                 </div>
-                <div>
-                  <label className="text-primary font-bold text-xs block mb-2 tracking-wide">QUANTITY:</label>
-                  <div 
-                    onClick={() => onInputFocus('calcQuantity', calcQuantity, setCalcQuantity)}
-                    className={`input-retro w-full p-3 rounded-lg text-white text-sm font-medium bg-gradient-to-r from-bg-card to-bg-dark border-2 transition-all cursor-pointer ${activeInputId === 'calcQuantity' ? 'border-accent shadow-[0_0_15px_rgba(239,239,187,0.5)] scale-[1.02] opacity-100 pointer-events-auto' : 'border-primary'}`}
-                  >
-                    {calcQuantity || <span className="text-gray-500">Enter quantity</span>}
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-primary font-bold text-xs block mb-2 tracking-wide uppercase">Enter Quantity:</label>
+                    <div 
+                      onClick={() => onInputFocus('calcQuantity', calcQuantity, setCalcQuantity)}
+                      className={`input-retro w-full p-3 rounded-lg text-white text-base font-bold bg-gradient-to-r from-bg-card to-bg-dark border-2 transition-all cursor-pointer flex items-center justify-between ${activeInputId === 'calcQuantity' ? 'border-accent shadow-[0_0_15px_rgba(239,239,187,0.5)] scale-[1.02] opacity-100 pointer-events-auto' : 'border-primary'}`}
+                    >
+                      <span>{calcQuantity || <span className="text-gray-500 font-normal">0.00</span>}</span>
+                      <i className="fas fa-keyboard text-xs opacity-50"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-primary font-bold text-xs block mb-2 tracking-wide uppercase">Select Unit:</label>
+                    <div className="relative" ref={dropdownRef}>
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(!isDropdownOpen);
+                          triggerRobotAnimation('amazed');
+                        }}
+                        className="input-retro w-full p-3 rounded-lg text-white text-base font-bold bg-gradient-to-r from-bg-card to-bg-dark border-2 border-primary focus:border-accent focus:outline-none transition-colors flex items-center justify-between"
+                      >
+                        <span>{calcUnit}</span>
+                        <i className={`fas fa-chevron-${isDropdownOpen ? 'up' : 'down'} text-xs`}></i>
+                      </button>
+                      
+                      {isDropdownOpen && (
+                        <div className="absolute top-full left-0 w-full bg-gradient-to-r from-bg-card to-bg-dark border-2 border-primary rounded-lg shadow-lg z-[1000] mt-1 max-h-48 overflow-y-auto">
+                          {selectedCategory === 'weight' ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('g');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'g' ? 'bg-primary/30' : ''}`}
+                              >
+                                g (gram)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('kg');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'kg' ? 'bg-primary/30' : ''}`}
+                              >
+                                kg (kilogram)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('quintal');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'quintal' ? 'bg-primary/30' : ''}`}
+                              >
+                                quintal
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('ton');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'ton' ? 'bg-primary/30' : ''}`}
+                              >
+                                ton
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('ml');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'ml' ? 'bg-primary/30' : ''}`}
+                              >
+                                ml (milliliter)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('l');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'l' ? 'bg-primary/30' : ''}`}
+                              >
+                                l (liter)
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCalcUnit('gallon');
+                                  setIsDropdownOpen(false);
+                                  triggerRobotAnimation('nodding');
+                                }}
+                                className={`w-full p-2 text-left text-white text-sm hover:bg-primary/20 transition-colors ${calcUnit === 'gallon' ? 'bg-primary/30' : ''}`}
+                              >
+                                gallon
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <div className="space-y-3">
+                  <button 
+                    onClick={() => {
+                      if (!calcQuantity || parseFloat(calcQuantity) <= 0 || isNaN(parseFloat(calcQuantity))) {
+                        showCustomNotification('Please enter a valid quantity');
+                        return;
+                      }
+
+                      playRetroSound('calculate');
+                      if (calcQuantity && unitRate) {
+                        // Convert calcQuantity to base unit for calculation
+                        let convertedQuantity = parseFloat(calcQuantity);
+                        
+                        // Convert to base unit
+                        if (selectedCategory === 'weight') {
+                          if (baseUnit === 'kg') {
+                            if (calcUnit === 'g') convertedQuantity = convertedQuantity / 1000;
+                            else if (calcUnit === 'quintal') convertedQuantity = convertedQuantity * 100;
+                            else if (calcUnit === 'ton') convertedQuantity = convertedQuantity * 1000;
+                          } else if (baseUnit === 'g') {
+                            if (calcUnit === 'kg') convertedQuantity = convertedQuantity * 1000;
+                            else if (calcUnit === 'quintal') convertedQuantity = convertedQuantity * 100000;
+                            else if (calcUnit === 'ton') convertedQuantity = convertedQuantity * 1000000;
+                          } else if (baseUnit === 'quintal') {
+                            if (calcUnit === 'g') convertedQuantity = convertedQuantity / 100000;
+                            else if (calcUnit === 'kg') convertedQuantity = convertedQuantity / 100;
+                            else if (calcUnit === 'ton') convertedQuantity = convertedQuantity * 10;
+                          } else if (baseUnit === 'ton') {
+                            if (calcUnit === 'g') convertedQuantity = convertedQuantity / 1000000;
+                            else if (calcUnit === 'kg') convertedQuantity = convertedQuantity / 1000;
+                            else if (calcUnit === 'quintal') convertedQuantity = convertedQuantity / 10;
+                          }
+                        } else {
+                          if (baseUnit === 'l') {
+                            if (calcUnit === 'ml') convertedQuantity = convertedQuantity / 1000;
+                            else if (calcUnit === 'gallon') convertedQuantity = convertedQuantity * 3.785;
+                          } else if (baseUnit === 'ml') {
+                            if (calcUnit === 'l') convertedQuantity = convertedQuantity * 1000;
+                            else if (calcUnit === 'gallon') convertedQuantity = convertedQuantity * 3785.41;
+                          } else if (baseUnit === 'gallon') {
+                            if (calcUnit === 'ml') convertedQuantity = convertedQuantity / 3785.41;
+                            else if (calcUnit === 'l') convertedQuantity = convertedQuantity / 3.785;
+                          }
+                        }
+                        
+                        const priceValue = convertedQuantity * unitRate;
+                        const result = `₹ ${priceValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                        setPriceResult(result);
+                        showResultNotification(result);
+                        
+                        setTimeout(() => {
+                            updateSystemMessage(`
+                            🤖 Perfect! ${calcQuantity} ${calcUnit} costs ${result}.<br />
+                            <span class="text-accent font-bold">Quantity calculation completed!</span><br />
+                            <span class="text-xs opacity-80">Rate: ₹${unitRate.toFixed(2)} per ${baseUnit}. Excellent value!</span>
+                          `);
+                        }, 100);
+                        
+                        triggerRobotAnimation('excited');
+                      }
+                    }}
+                    className="btn-retro w-full p-3 rounded-lg text-white font-bold text-sm tracking-wide hover:scale-[1.02] transition-transform"
+                  >
+                    <i className="fas fa-calculator mr-2"></i>
+                    CALCULATE PRICE
+                  </button>
+                  <button 
+                    onClick={() => {
+                      playRetroSound('reset');
+                      setCalcQuantity('');
+                      setPriceResult('');
+                      triggerRobotAnimation('glitching');
+                    }}
+                    className="w-full py-1.5 px-3 rounded-md bg-gradient-to-r from-gray-600 to-gray-700 text-white text-xs font-normal hover:from-accent hover:to-accent/80 transition-all duration-200 flex items-center justify-center space-x-1"
+                  >
+                    <i className="fas fa-eraser text-xs"></i>
+                    <span>CLEAR</span>
+                  </button>
+                </div>
+                {priceResult && (
+                  <div 
+                    className="mt-3 text-center p-3 rounded bg-primary/10 border-2 border-primary animate-pulse-slow cursor-pointer hover:bg-primary/20 transition-colors group"
+                    onClick={() => {
+                      if (priceResult) {
+                        playRetroSound('beep');
+                        showResultNotification(priceResult);
+                      }
+                    }}
+                  >
+                    <div className="text-primary text-[10px] font-black uppercase tracking-widest mb-1 flex items-center justify-center gap-2">
+                      RESULT <i className="fas fa-expand-alt text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    </div>
+                    <div className="text-white text-lg font-black break-words leading-tight">{priceResult}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
                 <div className="space-y-3">
                   <div>
                     <label className="text-primary font-bold text-xs block mb-2 tracking-wide">SELECT UNIT:</label>

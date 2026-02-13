@@ -1,0 +1,113 @@
+Sound Restoration & Tab Visibility Fix – Implementation Prompt
+
+Apply the following fixes to ensure proper functionality and visibility across the application. All changes must work correctly in both:
+
+Web Application
+
+Cordova Android Build
+
+1. Input Action Sound Fix (Important)
+
+Issue:
+
+After many input actions, the sound feedback stops playing or does not trigger.
+
+Required Fix:
+
+Ensure sound plays reliably on every input action such as:
+
+Button tap
+
+Quantity entry
+
+Price calculation
+
+Tab selection
+
+Prevent sound from stopping after repeated use.
+
+Implement audio reset or reuse logic (avoid creating multiple audio instances).
+
+Preload sound files for smooth playback.
+
+Ensure compatibility with Android WebView (Cordova).
+
+No delay, no missing sound during continuous usage.
+
+2. Price & Quantity Tab Visibility Fix
+
+Issue:
+
+In Price and Quantity calculation tabs, full text is not visible.
+
+Labels, values, or calculated results get cut off or hidden.
+
+Required Fix:
+
+Ensure all text, labels, and values are fully visible.
+
+Implement:
+
+Proper padding and spacing
+
+Responsive font sizing
+
+Auto height for containers
+
+No text overflow or clipping
+
+Use word wrapping where needed.
+
+Ensure calculated values (especially long numbers) remain fully visible.
+
+3. Tab Layout Optimization
+
+Tabs must adjust properly on all screen sizes.
+
+No element should overlap or go outside the screen.
+
+Ensure:
+
+Scroll enabled if content exceeds screen height
+
+Proper alignment for buttons, labels, and results
+
+Touch-friendly spacing
+
+4. Responsive Design (All Devices)
+
+Test and optimize for:
+
+Small mobile screens
+
+Large phones
+
+Tablets
+
+Maintain consistent layout and readability across different resolutions.
+
+5. Cordova Compatibility (Mandatory)
+
+Ensure all fixes work properly inside:
+
+Cordova Android WebView
+
+No layout breaking inside APK
+
+Audio must function correctly in Android environment
+
+UI rendering should match the web version
+
+6. Final Goal
+
+The application should:
+
+Play sound reliably on every action
+
+Display all Price and Quantity tab content clearly
+
+Avoid any text clipping or hidden elements
+
+Work smoothly and consistently across all devices
+
+Provide identical behavior in both Web and Cordova builds

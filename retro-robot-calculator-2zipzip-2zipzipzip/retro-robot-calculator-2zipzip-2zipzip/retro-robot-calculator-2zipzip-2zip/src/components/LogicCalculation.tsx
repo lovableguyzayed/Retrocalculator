@@ -131,7 +131,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
   };
 
   return (
-    <div className="w-1/2 bg-bg-card p-4 pt-4 relative overflow-y-auto z-20 flex flex-col" style={{ maxHeight: 'calc(100vh - 11rem)', zIndex: 10 }}>
+    <div className="w-1/2 h-full bg-bg-card p-4 pt-4 relative overflow-y-auto z-20 flex flex-col" style={{ zIndex: 10 }}>
       
       {/* Step 1: Category Selection */}
       {currentStep === 'category' && (

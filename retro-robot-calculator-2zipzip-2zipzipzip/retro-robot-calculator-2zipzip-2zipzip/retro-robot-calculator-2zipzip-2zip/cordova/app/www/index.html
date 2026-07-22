@@ -444,15 +444,13 @@
             word-break: break-word;
         }
 
-        /* The dynamic system message lives here. It must wrap long content and
-           scroll (not clip or overflow) so text ALWAYS stays inside the bubble,
-           regardless of how long the calculation-result message is. */
+        /* The dynamic system message lives here. It wraps/breaks long content so
+           text never spills sideways; vertical growth is handled by the bubble
+           (which grows to fit and only scrolls past its max-height). */
         .header-chat {
             width: 100%;
             min-width: 0;
             max-width: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
             overflow-wrap: anywhere;
             word-break: break-word;
         }
@@ -491,8 +489,8 @@
   no network is needed. The stylesheet is now imported in src/index.tsx.
 -->
 <script src="cordova.js"></script>
-  <script type="module" crossorigin src="./assets/index-BuxKaCzw.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-6iNVLeYh.css">
+  <script type="module" crossorigin src="./assets/index-CfI7bl3O.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-KrZUvZ-Q.css">
 </head>
 <body>
     <div id="root"></div>

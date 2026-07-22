@@ -1,0 +1,79 @@
+name: Build Android APK
+
+# Builds the Cordova Android debug APK and uploads it as a downloadable
+# artifact. Runs on pushes to the working branch and can be triggered manually
+# from the Actions tab (Run workflow).
+on:
+  push:
+    branches:
+      - claude/app-offline-responsive-audit-mfx88y
+  workflow_dispatch:
+
+env:
+  # Project lives at the repo root now.
+  PROJ: .
+  CI: "true"
+  CORDOVA_TELEMETRY_OPT_OUT: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Build web app (Vite) and sync into Cordova www
+        working-directory: ${{ env.PROJ }}
+        run: |
+          npm ci
+          npm run build
+          rm -rf cordova/app/www/assets
+          cp -r dist/assets cordova/app/www/assets
+          cp dist/index.html cordova/app/www/index.html
+
+      - name: Install Cordova
+        run: npm install -g cordova
+
+      - name: Add Android platform and build debug APK
+        working-directory: ${{ env.PROJ }}/cordova/app
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          # Sign every debug build with the committed, STABLE debug keystore.
+          # Otherwise each CI run auto-generates a new random debug key, so a
+          # freshly built APK can't install over a previously installed one
+          # (signature mismatch) and you'd have to uninstall first.
+          mkdir -p "$HOME/.android"
+          cp debug.keystore "$HOME/.android/debug.keystore"
+          # Auto-increment the Android versionCode so each build is seen as newer.
+          sed -i "s/<widget /<widget android-versionCode=\"${{ github.run_number }}\" /" config.xml
+          cordova platform add android || cordova platform add android@latest
+          cordova build android --verbose
+
+      - name: Locate APK
+        id: apk
+        working-directory: ${{ env.PROJ }}/cordova/app
+        run: |
+          APK=$(find platforms/android -name "*.apk" | head -1)
+          echo "Found APK: $APK"
+          echo "path=${{ env.PROJ }}/cordova/app/$APK" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrocalculator-debug-apk
+          path: ${{ steps.apk.outputs.path }}
+          if-no-files-found: error

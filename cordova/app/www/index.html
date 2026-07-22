@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Retro Robot Calculator</title>
+    <!--
+      Tailwind CSS, Font Awesome and the web fonts used to be loaded from remote
+      CDNs here. That made the app depend on a live network connection just to
+      render, so it broke completely offline. They are now compiled/bundled
+      locally by Vite (see src/index.tsx + tailwind.config.js) and ship inside
+      the app. The Tailwind theme config lives in tailwind.config.js.
+    -->
+    <style>
+        /* Retro font hierarchy */
+        .retro-title {
+            font-family: 'Orbitron', 'Russo One', monospace;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            text-shadow: 0 0 10px rgba(239, 239, 187, 0.5), 0 0 20px rgba(107, 136, 211, 0.3);
+        }
+
+        .retro-heading {
+            font-family: 'Russo One', 'Orbitron', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            text-shadow: 0 0 5px rgba(239, 239, 187, 0.4);
+        }
+
+        .retro-text {
+            font-family: 'Share Tech Mono', 'Orbitron', monospace;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 3px rgba(107, 136, 211, 0.3);
+        }
+
+        .retro-display {
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(239, 239, 187, 0.6), 0 0 15px rgba(239, 239, 187, 0.3);
+            background: linear-gradient(45deg, #EFEFBB, #6B88D3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Hide scrollbar */
+        ::-webkit-scrollbar { 
+            display: none;
+        }
+
+        /*
+         * RESPONSIVE SCALING.
+         * The whole UI is built with Tailwind's rem-based spacing/typography, so
+         * the root font-size is the single lever that scales every rem unit
+         * (padding, fonts, header, inputs...) proportionally on every device.
+         *
+         * We size it by min(vw, vh) so it scales down on SHORT screens too and
+         * never makes the layout taller than the viewport (which was making the
+         * app feel "oversized" / cut off on many devices). The cap is kept modest
+         * (17px) so large phones and tablets don't blow up.
+         *   short 360x640 -> ~13px | 390x844 -> ~14px | tablet -> 17px (capped)
+         *
+         * -webkit-text-size-adjust:100% stops mobile WebViews from auto-inflating
+         * text independently of this scale.
+         */
+        html {
+            font-size: clamp(12px, min(3.6vw, 2.15vh), 17px);
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+                 text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: 'Inter', monospace;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+            overflow: hidden; /* Prevent body scroll, handle in App */
+            min-height: 100vh;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Splash Screen Effects */
+        .scanlines {
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.2) 50%,
+                rgba(0,0,0,0.2)
+            );
+            background-size: 100% 4px;
+            position: fixed;
+            top: 0; 
+            right: 0; 
+            bottom: 0; 
+            left: 0;
+            z-index: 60;
+            pointer-events: none;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 0 #EFEFBB, -2px 0 #6B88D3; }
+            25% { text-shadow: -2px 0 #EFEFBB, 2px 0 #6B88D3; }
+            50% { text-shadow: 2px 0 #EFEFBB, -2px 0 #6B88D3; }
+            75% { text-shadow: -2px 0 #EFEFBB, 2px 0 #6B88D3; }
+            100% { text-shadow: 2px 0 #EFEFBB, -2px 0 #6B88D3; }
+        }
+
+        .glitch-text {
+            animation: glitch 0.5s infinite;
+        }
+
+        .crt-flicker {
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.97; }
+            50% { opacity: 1; }
+            100% { opacity: 0.98; }
+        }
+
+        @keyframes robot-entrance {
+            0% { transform: translateY(50px) scale(0.9); opacity: 0; }
+            50% { transform: translateY(-10px) scale(1.05); opacity: 0.8; }
+            100% { transform: translateY(0px) scale(1); opacity: 1; }
+        }
+
+        /* 360 degree rotation animation for rate confirmation */
+        .robot-confirm-rate {
+            animation: confirm-spin-360 1.5s ease-in-out 1;
+        }
+
+        @keyframes confirm-spin-360 {
+            0% { transform: scale(1) rotate(0deg); filter: brightness(1) saturate(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+            25% { transform: scale(1.1) rotate(90deg); filter: brightness(2) saturate(2) hue-rotate(90deg); box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+            50% { transform: scale(1.2) rotate(180deg); filter: brightness(3) saturate(3) hue-rotate(180deg); box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 0 80px rgba(255, 165, 0, 0.5); }
+            75% { transform: scale(1.1) rotate(270deg); filter: brightness(2.5) saturate(2.5) hue-rotate(270deg); box-shadow: 0 0 40px rgba(255, 215, 0, 0.7); }
+            100% { transform: scale(1) rotate(360deg); filter: brightness(1) saturate(1); box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+        }
+
+        @keyframes notification-slide-in {
+            0% { transform: translateX(-50%) translateY(-100px) scale(0.8); opacity: 0; }
+            100% { transform: translateX(-50%) translateY(0px) scale(1); opacity: 1; }
+        }
+
+        @keyframes notification-glow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(220, 38, 38, 0.3); }
+            50% { box-shadow: 0 6px 30px rgba(220, 38, 38, 0.6), 0 0 40px rgba(239, 239, 187, 0.2); }
+        }
+        
+        @keyframes modal-pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .modal-enter {
+            animation: modal-pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        
+        @keyframes slide-up {
+            0% { transform: translateY(100%); }
+            100% { transform: translateY(0); }
+        }
+        
+        .animate-slide-up {
+            animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes robot-float {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.02); }
+        }
+
+        @keyframes robot-wave {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-20deg); }
+            50% { transform: rotate(15deg); }
+            75% { transform: rotate(-10deg); }
+        }
+
+        @keyframes eye-blink {
+            0%, 90%, 100% { transform: scaleY(1); }
+            95% { transform: scaleY(0.1); }
+        }
+
+        @keyframes eye-scan {
+            0%, 100% { background: linear-gradient(135deg, #6B88D3, #EFEFBB); }
+            33% { background: linear-gradient(135deg, #00ff00, #EFEFBB); }
+            66% { background: linear-gradient(135deg, #ff6b6b, #EFEFBB); }
+        }
+
+        @keyframes antenna-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        @keyframes chest-glow {
+            0%, 100% { box-shadow: 0 0 15px #6B88D3, inset 0 0 10px rgba(107, 136, 211, 0.3); }
+            50% { box-shadow: 0 0 30px #EFEFBB, inset 0 0 20px rgba(239, 239, 187, 0.5); }
+        }
+
+        @keyframes logo-glow {
+            0%, 100% { text-shadow: 0 0 15px #6B88D3; }
+            50% { text-shadow: 0 0 30px #EFEFBB, 0 0 45px #6B88D3; }
+        }
+
+        @keyframes subtitle-fade {
+            0% { opacity: 0; transform: translateY(15px); }
+            100% { opacity: 1; transform: translateY(0px); }
+        }
+
+        @keyframes button-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        .robot-container {
+            animation: robot-entrance 2s ease-out, robot-float 4s ease-in-out 2s infinite;
+        }
+
+        .robot-eye {
+            animation: eye-scan 3s ease-in-out infinite, eye-blink 6s ease-in-out infinite;
+            border-radius: 50%;
+        }
+
+        .robot-antenna {
+            animation: antenna-pulse 2s ease-in-out infinite;
+        }
+
+        .robot-arm-left {
+            animation: robot-wave 3s ease-in-out infinite;
+            transform-origin: top center;
+        }
+
+        .robot-arm-right {
+            animation: robot-wave 3s ease-in-out infinite 1.5s;
+            transform-origin: top center;
+        }
+
+        .robot-chest {
+            animation: chest-glow 3s ease-in-out infinite;
+        }
+
+        .logo-text {
+            animation: logo-glow 4s ease-in-out infinite;
+        }
+
+        .subtitle-text {
+            animation: subtitle-fade 1s ease-out 1s both;
+        }
+
+        .enter-button {
+            animation: button-pulse 2s ease-in-out 3s infinite;
+        }
+
+        /* Robot Animations */
+        @keyframes robot-idle {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-3px) scale(1.01); }
+        }
+
+        @keyframes robot-excited {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(-2deg); }
+            50% { transform: scale(1.08) rotate(0deg); }
+            75% { transform: scale(1.05) rotate(2deg); }
+        }
+
+        @keyframes arm-wave {
+            0%, 100% { transform: rotate(0deg); }
+            33% { transform: rotate(-30deg); }
+            66% { transform: rotate(30deg); }
+        }
+
+        /* ACTIONS */
+
+        @keyframes robot-crunch-numbers {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95, 1.05); }
+        }
+        
+        @keyframes robot-weighing-scale {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-8deg); }
+            75% { transform: rotate(8deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes robot-power-surge {
+            0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(239, 239, 187, 0.6); filter: brightness(1.3); }
+            100% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); }
+        }
+
+        @keyframes robot-backflip {
+            0% { transform: translateY(0) scale(1) rotate(0deg); }
+            40% { transform: translateY(-50px) scale(0.9) rotate(-180deg); } 
+            80% { transform: translateY(0) scale(1.1) rotate(-360deg); } 
+            100% { transform: translateY(0) scale(1) rotate(-360deg); }
+        }
+        
+        .robot-celebrating .robot-body {
+            animation: robot-backflip 1s ease-in-out;
+        }
+
+        /* DANCING */
+        @keyframes robot-dance-body {
+            0%, 100% { transform: translateY(0) scale(1); filter: hue-rotate(0deg); }
+            50% { transform: translateY(-25px) scale(1.05); filter: hue-rotate(180deg); } 
+        }
+
+        @keyframes robot-dance-arm-left {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-150deg); } 
+        }
+        
+        @keyframes robot-dance-arm-right {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(150deg); } 
+        }
+
+        @keyframes robot-dance-leg-left {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(25deg); } 
+        }
+        
+        @keyframes robot-dance-leg-right {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(-25deg); } 
+        }
+
+        @keyframes robot-dance-head {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .robot-nodding .robot-body {
+            animation: robot-nod 0.4s ease-in-out infinite;
+        }
+        @keyframes robot-nod {
+            0%, 100% { transform: translateY(0) rotate(0); }
+            50% { transform: translateY(10px) rotate(0); }
+        }
+
+        .robot-glitching .robot-body {
+            animation: robot-glitch-anim 0.2s steps(5) infinite;
+        }
+        @keyframes robot-glitch-anim {
+            0% { transform: skew(0deg); opacity: 1; }
+            20% { transform: skew(-20deg) translateX(-10px); opacity: 0.8; }
+            40% { transform: skew(20deg) translateX(10px); opacity: 0.9; }
+            60% { transform: skew(0deg); opacity: 0.5; }
+            80% { transform: skew(-10deg); opacity: 1; }
+            100% { transform: skew(0deg); opacity: 1; }
+        }
+
+        .robot-teleporting .robot-body {
+            animation: robot-teleport 1.2s ease-in-out forwards;
+        }
+        @keyframes robot-teleport {
+            0% { transform: scale(1); opacity: 1; filter: brightness(1); }
+            40% { transform: scale(0.1); opacity: 0; filter: brightness(5); }
+            60% { transform: scale(0.1); opacity: 0; filter: brightness(5); }
+            100% { transform: scale(1); opacity: 1; filter: brightness(1); }
+        }
+
+        .robot-amazed .robot-body {
+            animation: robot-amazed 1s ease-out infinite;
+        }
+        @keyframes robot-amazed {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1) translateY(-10px); }
+        }
+
+        /* Applying Animations */
+        .robot-idle .robot-body { animation: robot-idle 4s ease-in-out infinite; }
+        .robot-excited .robot-body { animation: robot-excited 1.5s ease-in-out 3; }
+        .robot-wave .robot-arm-left { animation: arm-wave 1.2s ease-in-out 4; }
+        .robot-wave .robot-arm-right { animation: arm-wave 1.2s ease-in-out 4 0.3s; }
+        
+        .robot-thinking .robot-body { animation: robot-crunch-numbers 0.3s ease-in-out infinite; }
+        .robot-scanning .robot-body { animation: robot-weighing-scale 2s ease-in-out infinite; transform-origin: bottom center; }
+        .robot-processing .robot-body { animation: robot-power-surge 0.5s ease-in-out infinite; }
+
+        .robot-dancing .robot-body { animation: robot-dance-body 0.6s ease-in-out infinite; }
+        .robot-dancing .robot-leg-left { animation: robot-dance-leg-left 0.6s ease-in-out infinite; transform-origin: top center; }
+        .robot-dancing .robot-leg-right { animation: robot-dance-leg-right 0.6s ease-in-out infinite; transform-origin: top center; }
+        .robot-dancing .robot-arm-left { animation: robot-dance-arm-left 0.6s ease-in-out infinite; transform-origin: top right; }
+        .robot-dancing .robot-arm-right { animation: robot-dance-arm-right 0.6s ease-in-out infinite; transform-origin: top left; }
+        .robot-dancing .robot-body > div.relative.z-30 { animation: robot-dance-head 0.6s ease-in-out infinite; transform-origin: bottom center; }
+
+        /* Category-select cues (weight = balance tilt, volume = liquid slosh) */
+        @keyframes robot-weigh {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-7deg); }
+            75% { transform: rotate(7deg); }
+        }
+        .robot-weight-mode .robot-body { animation: robot-weigh 0.8s ease-in-out 2; transform-origin: bottom center; }
+
+        @keyframes robot-slosh {
+            0%, 100% { transform: translateX(0) skewX(0deg); }
+            25% { transform: translateX(-6px) skewX(5deg); }
+            75% { transform: translateX(6px) skewX(-5deg); }
+        }
+        .robot-volume-mode .robot-body { animation: robot-slosh 0.8s ease-in-out 2; }
+
+        /* UI Styles */
+        .btn-retro {
+            background: linear-gradient(135deg, #6B88D3, #00008B);
+            border: 2px solid #6B88D3;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(107, 136, 211, 0.3);
+            font-weight: 500;
+        }
+
+        .btn-retro:hover {
+            background: linear-gradient(135deg, #EFEFBB, #6B88D3);
+            color: #00008B;
+            border-color: #EFEFBB;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 239, 187, 0.4);
+        }
+
+        .input-retro {
+            background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
+            border: 2px solid #6B88D3;
+            transition: all 0.3s ease;
+        }
+
+        .input-retro:focus {
+            border-color: #EFEFBB;
+            box-shadow: 0 0 15px rgba(239, 239, 187, 0.3);
+            outline: none;
+            background: linear-gradient(135deg, #252542, #1a1a2e);
+        }
+
+        .retro-panel {
+            background: linear-gradient(135deg, #1a1a2e, #0a0a1a);
+            border: 2px solid #00008B;
+            box-shadow: inset 0 2px 10px rgba(107, 136, 211, 0.2);
+            overflow: visible;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-bubble-retro {
+            background: rgba(10, 10, 26, 0.8);
+            border: 1px solid rgba(107, 136, 211, 0.6);
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            position: relative;
+            /* Text-containment: never let a long word/number escape the bubble. */
+            max-width: 100%;
+            width: 100%;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        /* The dynamic system message lives here. It wraps/breaks long content so
+           text never spills sideways; vertical growth is handled by the bubble
+           (which grows to fit and only scrolls past its max-height). */
+        .header-chat {
+            width: 100%;
+            min-width: 0;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .chat-bubble-retro::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: -6px;
+            width: 10px;
+            height: 10px;
+            background: rgba(10, 10, 26, 0.6);
+            border-left: 1px solid rgba(107, 136, 211, 0.4);
+            border-bottom: 1px solid rgba(107, 136, 211, 0.4);
+            transform: rotate(45deg);
+        }
+
+        .border-3 { border-width: 3px; }
+        .w-30 { width: 7.5rem; }
+        
+        /* New Retro Readout Style */
+        .retro-readout-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.4;
+            text-shadow: 0 0 5px rgba(107, 136, 211, 0.5);
+        }
+
+        .notification-enter {
+            animation: notification-slide-in 0.5s ease-out, notification-glow 2s ease-in-out infinite;
+        }
+    </style>
+<!--
+  Removed the esm.sh import map that resolved "react"/"react-dom" to a remote
+  CDN at runtime (another offline break). React is bundled locally by Vite, so
+  no network is needed. The stylesheet is now imported in src/index.tsx.
+-->
+<script src="cordova.js"></script>
+  <script type="module" crossorigin src="./assets/index-nPz1YD-L.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-ClPEZvQi.css">
+</head>
+<body>
+    <div id="root"></div>
+</body>
+</html>

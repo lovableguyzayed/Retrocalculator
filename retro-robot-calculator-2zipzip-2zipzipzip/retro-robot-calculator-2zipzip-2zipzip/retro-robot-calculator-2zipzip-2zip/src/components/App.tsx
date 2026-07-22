@@ -9,7 +9,6 @@ import NumberPad from "./NumberPad";
 export default function ChatCalculator() {
   const [appStarted, setAppStarted] = useState(false);
   const [robotState, setRobotState] = useState<RobotState>('idle');
-  const [robotStatus, setRobotStatus] = useState<string>('READY');
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   
   // Custom Number Pad State
@@ -373,7 +372,6 @@ export default function ChatCalculator() {
           showResultNotification={showResultNotification}
           triggerRobotAnimation={triggerRobotAnimation}
           updateSystemMessage={updateSystemMessage}
-          setRobotStatus={setRobotStatus}
           onSyncState={handleSyncState}
           activeInputId={activeInputId}
           onInputFocus={handleInputFocus}

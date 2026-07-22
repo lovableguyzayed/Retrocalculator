@@ -1,6 +1,22 @@
 import React, { useRef, useLayoutEffect } from "react";
 
-export type RobotState = 'idle' | 'excited' | 'wave' | 'thinking' | 'calculating' | 'celebrating' | 'nodding' | 'scanning' | 'processing' | 'energizing' | 'confused' | 'amazed' | 'morphing' | 'exploding' | 'teleporting' | 'glitching' | 'levitating' | 'matrix' | 'hologram' | 'quantum' | 'cosmic' | 'dimensional' | 'weight-mode' | 'volume-mode' | 'calculator-mode' | 'result-mode' | 'reset-mode' | 'confirm-rate' | 'dancing';
+// Only the states that are actually triggered and have a matching CSS animation.
+export type RobotState =
+  | 'idle'
+  | 'wave'
+  | 'excited'
+  | 'thinking'
+  | 'celebrating'
+  | 'nodding'
+  | 'scanning'
+  | 'processing'
+  | 'amazed'
+  | 'teleporting'
+  | 'glitching'
+  | 'weight-mode'
+  | 'volume-mode'
+  | 'confirm-rate'
+  | 'dancing';
 
 interface RobotProps {
   state: RobotState;

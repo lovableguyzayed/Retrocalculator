@@ -11,7 +11,6 @@ interface LogicCalculationProps {
   showResultNotification: (message: string) => void;
   triggerRobotAnimation: (animation: RobotState) => void;
   updateSystemMessage: (html: string) => void;
-  setRobotStatus: (status: string) => void;
   onSyncState: (data: { currentStep: CalculatorStep; unitRate: number; baseUnit: string }) => void;
   activeInputId: string | null;
   onInputFocus: (id: string, currentVal: string, onChange: (val: string) => void) => void;
@@ -24,7 +23,6 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
   showResultNotification,
   triggerRobotAnimation,
   updateSystemMessage,
-  setRobotStatus,
   onSyncState,
   activeInputId,
   onInputFocus
@@ -96,13 +94,8 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
         `);
     }, 500);
     
-    setRobotStatus('PROCESSING');
     // The weight-mode / volume-mode cue above now plays (it used to be
     // instantly overridden by an 'excited' trigger here).
-
-    setTimeout(() => {
-      setRobotStatus('READY');
-    }, 2000);
   };
 
   const setBaseRate = () => {
@@ -117,8 +110,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
     const rate = price / quantity;
     setUnitRate(rate);
     setCurrentStep('calculator');
-    setRobotStatus('GROOVING');
-    
+
     playRetroSound('success');
     triggerHaptic('medium');
     
@@ -129,10 +121,6 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
     setTimeout(() => {
       triggerRobotAnimation('dancing');
     }, 1700);
-
-    setTimeout(() => {
-      setRobotStatus('READY');
-    }, 6000);
   };
 
   return (

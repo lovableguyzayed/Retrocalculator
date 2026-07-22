@@ -54,15 +54,22 @@
         }
 
         /*
-         * RESPONSIVE SCALING (fixes "UI too small on tablets / too large on phones").
+         * RESPONSIVE SCALING.
          * The whole UI is built with Tailwind's rem-based spacing/typography, so
-         * tying the root font-size to the viewport width makes every rem unit
-         * (padding, font, the h-44 header, the robot's dimensions, etc.) scale
-         * proportionally instead of staying a fixed pixel size on every device.
-         *   ~360px phone -> ~14px   |   ~430px phone -> ~15px   |   >=768px tablet -> 20px (capped)
+         * the root font-size is the single lever that scales every rem unit
+         * (padding, fonts, header, inputs...) proportionally on every device.
+         *
+         * We size it by min(vw, vh) so it scales down on SHORT screens too and
+         * never makes the layout taller than the viewport (which was making the
+         * app feel "oversized" / cut off on many devices). The cap is kept modest
+         * (17px) so large phones and tablets don't blow up.
+         *   short 360x640 -> ~13px | 390x844 -> ~14px | tablet -> 17px (capped)
+         *
+         * -webkit-text-size-adjust:100% stops mobile WebViews from auto-inflating
+         * text independently of this scale.
          */
         html {
-            font-size: clamp(14px, calc(1.5vw + 8.6px), 20px);
+            font-size: clamp(12px, min(3.6vw, 2.15vh), 17px);
             -webkit-text-size-adjust: 100%;
             -moz-text-size-adjust: 100%;
                  text-size-adjust: 100%;
@@ -489,8 +496,8 @@
   no network is needed. The stylesheet is now imported in src/index.tsx.
 -->
 <script src="cordova.js"></script>
-  <script type="module" crossorigin src="./assets/index-CfI7bl3O.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-KrZUvZ-Q.css">
+  <script type="module" crossorigin src="./assets/index-uEeIFJWB.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-ClPEZvQi.css">
 </head>
 <body>
     <div id="root"></div>

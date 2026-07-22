@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useLayoutEffect } from "react";
 
 export type RobotState = 'idle' | 'excited' | 'wave' | 'thinking' | 'calculating' | 'celebrating' | 'nodding' | 'scanning' | 'processing' | 'energizing' | 'confused' | 'amazed' | 'morphing' | 'exploding' | 'teleporting' | 'glitching' | 'levitating' | 'matrix' | 'hologram' | 'quantum' | 'cosmic' | 'dimensional' | 'weight-mode' | 'volume-mode' | 'calculator-mode' | 'result-mode' | 'reset-mode' | 'confirm-rate' | 'dancing';
 
@@ -10,6 +10,45 @@ interface RobotProps {
 }
 
 const Robot: React.FC<RobotProps> = ({ state, currentStep, unitRate, baseUnit }) => {
+  // Fit-to-container scaling. Instead of guessing a scale from viewport-width
+  // breakpoints (which clipped the robot or oversized it on many devices and
+  // aspect ratios), we measure the robot's real size and the space available in
+  // its column, then scale it to fit BOTH width and height. This guarantees the
+  // whole robot is always visible and correctly sized on any screen, and it is
+  // immune to the device's system font-scale setting because it uses measured
+  // pixels + a transform rather than rem units.
+  const availRef = useRef<HTMLDivElement>(null);
+  const scaleRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const avail = availRef.current;
+    const el = scaleRef.current;
+    if (!avail || !el) return;
+
+    const fit = () => {
+      // offsetWidth/Height are layout sizes, unaffected by the current transform.
+      const ew = el.offsetWidth;
+      const eh = el.offsetHeight;
+      if (!ew || !eh) return;
+      const aw = avail.clientWidth;
+      const ah = avail.clientHeight;
+      // 0.9 leaves a little breathing room; cap at 1.15 so it never balloons.
+      const scale = Math.min(aw / ew, ah / eh, 1.15) * 0.9;
+      el.style.transform = `scale(${scale})`;
+    };
+
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(avail);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+      window.removeEventListener('orientationchange', fit);
+    };
+  }, []);
+
   return (
     <div className="w-1/2 bg-gradient-to-b from-bg-dark via-gray-900 to-bg-dark flex flex-col items-center justify-center p-2 md:p-4 relative robot-container-wrapper overflow-hidden flex-shrink-0 border-r-2 border-primary h-full">
       {/* Background Pattern */}
@@ -37,14 +76,14 @@ const Robot: React.FC<RobotProps> = ({ state, currentStep, unitRate, baseUnit })
         </div>
       )}
 
-      {/* Retro Robot Character Container - Animation Class Applied Here */}
-      <div className={`robot-${state} relative w-full flex flex-col items-center justify-center robot-container h-full`}>
-         
-         {/* Scaling Wrapper. The robot's dimensions are rem-based, so they already
-             scale with the fluid root font-size (see html{} in index.html). These
-             breakpoint steps only fine-tune the fit inside the 50%-width column and
-             are capped at 95% so the robot never becomes oversized on tablets. */}
-         <div className="transform scale-[0.65] sm:scale-[0.75] md:scale-[0.85] lg:scale-95 origin-center transition-transform duration-300 flex flex-col items-center">
+      {/* Retro Robot Character Container - Animation Class Applied Here.
+          availRef measures the space the robot may occupy in its column. */}
+      <div ref={availRef} className={`robot-${state} relative w-full flex flex-col items-center justify-center robot-container h-full`}>
+
+         {/* Scaling Wrapper - scaled to fit its container by the effect above
+             (transform is set at runtime), so the robot is fully visible on any
+             device instead of being clipped by fixed viewport-width breakpoints. */}
+         <div ref={scaleRef} style={{ transform: 'scale(0.7)' }} className="origin-center transition-transform duration-300 flex flex-col items-center will-change-transform">
            
            <div className="robot-body relative flex flex-col items-center">
             {/* Antenna */}

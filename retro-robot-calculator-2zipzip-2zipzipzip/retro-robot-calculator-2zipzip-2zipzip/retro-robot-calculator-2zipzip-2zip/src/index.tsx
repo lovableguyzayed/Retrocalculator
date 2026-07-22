@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from "react-dom/client";
 import App from "./components/App";
+import { initTextFit } from "./textFit";
 
 // --- Offline-first styling ---
 // These were previously pulled from remote CDNs (cdn.tailwindcss.com,
@@ -19,6 +20,11 @@ import "@fontsource/inter/latin-700.css";
 import "@fontsource/orbitron/latin-900.css";
 import "@fontsource/russo-one/latin-400.css";
 import "@fontsource/share-tech-mono/latin-400.css";
+
+// Neutralize the device's system font-scale and set the responsive root size
+// BEFORE React mounts, so every component (incl. the robot's fit-to-container
+// scaler) measures against the corrected size.
+initTextFit();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {

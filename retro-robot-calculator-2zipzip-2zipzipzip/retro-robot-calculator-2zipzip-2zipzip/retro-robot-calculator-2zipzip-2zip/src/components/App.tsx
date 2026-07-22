@@ -290,13 +290,12 @@ export default function ChatCalculator() {
         />
       )}
       
-      {/* Fixed Border Lines - Always visible now */}
-      <div className="absolute top-44 left-0 w-full h-0.5 bg-primary z-30"></div>
-      <div className="absolute top-44 left-1/2 bottom-0 w-0.5 bg-primary z-30"></div>
-      
-      {/* Chat Assistant Header - Fixed height. overflow-hidden keeps the chat
-          content band from ever escaping the 176px (h-44) header region. */}
-      <div className="h-44 bg-gradient-to-r from-bg-dark via-bg-card to-bg-dark p-4 relative flex-shrink-0 z-20 overflow-hidden">
+      {/* Chat Assistant Header - AUTO height: it grows to fit the whole message
+          so long text is always fully visible (never clipped, never spilled).
+          min-h keeps the original look for short messages. The divider that used
+          to be an absolute line pinned at a fixed 176px is now this header's
+          border-bottom, so it always sits at the real (dynamic) header edge. */}
+      <div className="min-h-[11rem] bg-gradient-to-r from-bg-dark via-bg-card to-bg-dark p-4 relative flex-shrink-0 z-20 border-b-2 border-primary">
 
         {/* Offline indicator: the calculator is 100% local, so it keeps working
             with no network — this just tells the user they are offline. */}
@@ -313,7 +312,7 @@ export default function ChatCalculator() {
           `,
           backgroundSize: '25px 25px'
         }}></div>
-        <div className="flex items-start space-x-3 h-full">
+        <div className="flex items-start space-x-3">
           <div className="w-16 h-16 bg-gradient-to-b from-primary to-dark-blue rounded-xl border-2 border-accent flex items-center justify-center flex-shrink-0 shadow-lg relative">
             <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-1.5 h-4 bg-gray-500 border border-dark-blue"></div>
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-red-500 rounded-full border border-red-700 animate-pulse"></div>
@@ -325,7 +324,7 @@ export default function ChatCalculator() {
             <div className="absolute -right-2 w-1.5 h-6 bg-gray-500 rounded-r border border-dark-blue"></div>
           </div>
           
-          <div className="flex-1 h-full flex flex-col min-h-0">
+          <div className="flex-1 min-w-0 flex flex-col">
             <div className="text-accent text-xs sm:text-sm font-bold mb-2 tracking-wider flex items-center">
               <i className="fas fa-robot mr-2"></i>
               RETRO-BOT ASSISTANT
@@ -333,8 +332,10 @@ export default function ChatCalculator() {
             <div className="text-white text-sm sm:text-base font-semibold mb-1 tracking-wide break-words">
               Welcome to Quantity Price Calculator
             </div>
-            <div className="flex-1 min-h-0 flex">
-              <div className="chat-bubble-retro w-full min-h-0 flex">
+            {/* Bubble grows with its content so the full message shows. It only
+                starts scrolling past 40vh, which real messages never reach. */}
+            <div className="w-full">
+              <div className="chat-bubble-retro w-full max-h-[40vh] overflow-y-auto">
                 <div className="header-chat text-white text-xs font-medium leading-tight w-full min-w-0">
                   <div>
                     🤖 Welcome to Quantity Price Calculator!<br />

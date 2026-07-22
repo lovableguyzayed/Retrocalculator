@@ -11,7 +11,7 @@ interface RobotProps {
 
 const Robot: React.FC<RobotProps> = ({ state, currentStep, unitRate, baseUnit }) => {
   return (
-    <div className="w-1/2 bg-gradient-to-b from-bg-dark via-gray-900 to-bg-dark flex flex-col items-center justify-center p-2 md:p-4 relative robot-container-wrapper overflow-hidden flex-shrink-0 border-r-2 border-primary/30 h-full">
+    <div className="w-1/2 bg-gradient-to-b from-bg-dark via-gray-900 to-bg-dark flex flex-col items-center justify-center p-2 md:p-4 relative robot-container-wrapper overflow-hidden flex-shrink-0 border-r-2 border-primary h-full">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-20" style={{
         backgroundImage: `

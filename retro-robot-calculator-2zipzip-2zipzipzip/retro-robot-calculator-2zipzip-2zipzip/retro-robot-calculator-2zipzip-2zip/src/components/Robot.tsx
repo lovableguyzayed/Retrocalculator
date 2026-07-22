@@ -25,15 +25,23 @@ const Robot: React.FC<RobotProps> = ({ state, currentStep, unitRate, baseUnit })
     const el = scaleRef.current;
     if (!avail || !el) return;
 
+    // The robot's arms are absolutely positioned and extend well beyond the
+    // measured body box (and they wave, so a live measurement is unreliable).
+    // offsetWidth only sees the body, so on narrow phone columns the scaler
+    // used to pick a scale that was too big and clipped the arms. Inflate the
+    // measured width to include the arm overhang (~50% wider than the body) so
+    // the whole robot fits by width on phones. Tablet columns are limited by
+    // height, so this leaves the (already perfect) tablet size unchanged.
+    const ARM_OVERFLOW = 1.5;
     const fit = () => {
       // offsetWidth/Height are layout sizes, unaffected by the current transform.
-      const ew = el.offsetWidth;
+      const ew = el.offsetWidth * ARM_OVERFLOW;
       const eh = el.offsetHeight;
       if (!ew || !eh) return;
       const aw = avail.clientWidth;
       const ah = avail.clientHeight;
-      // 0.9 leaves a little breathing room; cap at 1.15 so it never balloons.
-      const scale = Math.min(aw / ew, ah / eh, 1.15) * 0.9;
+      // 0.92 leaves a little breathing room; cap at 1.1 so it never balloons.
+      const scale = Math.min(aw / ew, ah / eh, 1.1) * 0.92;
       el.style.transform = `scale(${scale})`;
     };
 

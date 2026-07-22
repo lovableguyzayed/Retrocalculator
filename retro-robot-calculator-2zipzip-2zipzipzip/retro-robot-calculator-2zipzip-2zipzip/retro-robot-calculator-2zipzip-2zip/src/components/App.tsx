@@ -243,6 +243,9 @@ export default function ChatCalculator() {
       else if (animation === 'amazed') duration = 2000;
       else if (animation === 'dancing') duration = 4200;
       else if (animation === 'celebrating') duration = 1000;
+      else if (animation === 'wave') duration = 3600;
+      else if (animation === 'weight-mode') duration = 1600;
+      else if (animation === 'volume-mode') duration = 1600;
       
       setTimeout(() => {
         setRobotState('idle');
@@ -265,6 +268,8 @@ export default function ChatCalculator() {
   const handleAppStart = () => {
     playRetroSound('power');
     setAppStarted(true);
+    // Robot waves hello once the main screen is up.
+    setTimeout(() => triggerRobotAnimation('wave'), 600);
   };
 
   if (!appStarted) {

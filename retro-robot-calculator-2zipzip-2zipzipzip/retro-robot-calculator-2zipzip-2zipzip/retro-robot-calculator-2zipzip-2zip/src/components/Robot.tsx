@@ -40,8 +40,11 @@ const Robot: React.FC<RobotProps> = ({ state, currentStep, unitRate, baseUnit })
       {/* Retro Robot Character Container - Animation Class Applied Here */}
       <div className={`robot-${state} relative w-full flex flex-col items-center justify-center robot-container h-full`}>
          
-         {/* Scaling Wrapper - increased scale further */}
-         <div className="transform scale-[0.65] sm:scale-[0.75] md:scale-[0.9] lg:scale-100 xl:scale-110 origin-center transition-transform duration-300 flex flex-col items-center">
+         {/* Scaling Wrapper. The robot's dimensions are rem-based, so they already
+             scale with the fluid root font-size (see html{} in index.html). These
+             breakpoint steps only fine-tune the fit inside the 50%-width column and
+             are capped at 95% so the robot never becomes oversized on tablets. */}
+         <div className="transform scale-[0.65] sm:scale-[0.75] md:scale-[0.85] lg:scale-95 origin-center transition-transform duration-300 flex flex-col items-center">
            
            <div className="robot-body relative flex flex-col items-center">
             {/* Antenna */}

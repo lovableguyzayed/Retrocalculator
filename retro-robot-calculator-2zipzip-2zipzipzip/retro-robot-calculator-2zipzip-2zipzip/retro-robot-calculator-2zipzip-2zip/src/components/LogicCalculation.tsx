@@ -97,8 +97,9 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
     }, 500);
     
     setRobotStatus('PROCESSING');
-    triggerRobotAnimation('excited');
-    
+    // The weight-mode / volume-mode cue above now plays (it used to be
+    // instantly overridden by an 'excited' trigger here).
+
     setTimeout(() => {
       setRobotStatus('READY');
     }, 2000);
@@ -121,13 +122,17 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
     playRetroSound('success');
     triggerHaptic('medium');
     
+    // Rate confirmed: play the purpose-built 360° confirm spin, then celebrate.
+    setTimeout(() => {
+      triggerRobotAnimation('confirm-rate');
+    }, 50);
     setTimeout(() => {
       triggerRobotAnimation('dancing');
-    }, 50);
-    
+    }, 1700);
+
     setTimeout(() => {
       setRobotStatus('READY');
-    }, 4200);
+    }, 6000);
   };
 
   return (
@@ -221,7 +226,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                   <button
                     onClick={() => {
                       setIsDropdownOpen(!isDropdownOpen);
-                      triggerRobotAnimation('amazed');
+                      triggerRobotAnimation('scanning');
                     }}
                     className="input-retro w-full p-4 rounded-lg text-white text-base font-bold bg-gradient-to-r from-bg-card to-bg-dark border-2 border-primary focus:border-accent focus:outline-none transition-colors flex items-center justify-between"
                   >
@@ -477,6 +482,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                       }
 
                       playRetroSound('calculate');
+                      triggerRobotAnimation('thinking'); // crunch the numbers
                       if (calcPrice && unitRate) {
                         const quantity = parseFloat(calcPrice) / unitRate;
                         
@@ -582,8 +588,9 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                             <span class="text-xs opacity-80">Rate: ₹${unitRate.toFixed(2)} per ${baseUnit}. Great deal!</span>
                           `);
                         }, 100);
-                        
-                        triggerRobotAnimation('excited');
+
+                        // Let 'thinking' play, then react with delight to the result.
+                        setTimeout(() => triggerRobotAnimation('excited'), 900);
                       }
                     }}
                     className="btn-retro w-full p-3 rounded-lg text-white font-bold text-sm tracking-wide hover:scale-[1.02] transition-transform"
@@ -757,6 +764,7 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                       }
 
                       playRetroSound('calculate');
+                      triggerRobotAnimation('thinking'); // crunch the numbers
                       if (calcQuantity && unitRate) {
                         // Convert calcQuantity to base unit for calculation
                         let convertedQuantity = parseFloat(calcQuantity);
@@ -805,8 +813,9 @@ const LogicCalculation: React.FC<LogicCalculationProps> = ({
                             <span class="text-xs opacity-80">Rate: ₹${unitRate.toFixed(2)} per ${baseUnit}. Excellent value!</span>
                           `);
                         }, 100);
-                        
-                        triggerRobotAnimation('excited');
+
+                        // Let 'thinking' play, then celebrate the result with a backflip.
+                        setTimeout(() => triggerRobotAnimation('celebrating'), 900);
                       }
                     }}
                     className="btn-retro w-full p-3 rounded-lg text-white font-bold text-sm tracking-wide hover:scale-[1.02] transition-transform"

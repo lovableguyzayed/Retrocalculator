@@ -294,8 +294,18 @@ export default function ChatCalculator() {
       <div className="absolute top-44 left-0 w-full h-0.5 bg-primary z-30"></div>
       <div className="absolute top-44 left-1/2 bottom-0 w-0.5 bg-primary z-30"></div>
       
-      {/* Chat Assistant Header - Fixed height */}
-      <div className="h-44 bg-gradient-to-r from-bg-dark via-bg-card to-bg-dark p-4 relative flex-shrink-0 z-20">
+      {/* Chat Assistant Header - Fixed height. overflow-hidden keeps the chat
+          content band from ever escaping the 176px (h-44) header region. */}
+      <div className="h-44 bg-gradient-to-r from-bg-dark via-bg-card to-bg-dark p-4 relative flex-shrink-0 z-20 overflow-hidden">
+
+        {/* Offline indicator: the calculator is 100% local, so it keeps working
+            with no network — this just tells the user they are offline. */}
+        {!isOnline && (
+          <div className="absolute top-2 right-2 z-40 flex items-center gap-1.5 px-2 py-1 rounded-md bg-black/70 border border-amber-400/70 text-amber-300 text-[10px] font-bold tracking-widest shadow-lg">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            OFFLINE
+          </div>
+        )}
         <div className="absolute inset-0 opacity-10" style={{
           backgroundImage: `
             linear-gradient(rgba(239, 239, 187, 0.3) 1px, transparent 1px),
@@ -323,9 +333,9 @@ export default function ChatCalculator() {
             <div className="text-white text-sm sm:text-base font-semibold mb-1 tracking-wide break-words">
               Welcome to Quantity Price Calculator
             </div>
-            <div className="flex-1 min-h-0">
-              <div className="chat-bubble-retro w-full flex items-start h-full">
-                <div className="header-chat text-white text-xs font-medium leading-tight w-full overflow-hidden">
+            <div className="flex-1 min-h-0 flex">
+              <div className="chat-bubble-retro w-full min-h-0 flex">
+                <div className="header-chat text-white text-xs font-medium leading-tight w-full min-w-0">
                   <div>
                     🤖 Welcome to Quantity Price Calculator!<br />
                     <span className="text-accent font-bold">Select your unit category to begin calculations</span><br />
